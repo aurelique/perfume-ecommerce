@@ -1,1 +1,71 @@
-<h1>Hello World</h1>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Perfumes - Elegance in Every Drop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">LUXE FRAGRANCE</div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="cart-icon">
+                <span id="cart-count">0</span>
+                🛒
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="animate-on-scroll">Discover Your Signature Scent</h1>
+            <p class="animate-on-scroll">Luxury perfumes crafted for the modern individual</p>
+            <a href="#products" class="btn animate-on-scroll">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products-section">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll">Our Collection</h2>
+            <div class="filters animate-on-scroll">
+                <button class="filter-btn active" data-category="all">All</button>
+                <button class="filter-btn" data-category="men">Men</button>
+                <button class="filter-btn" data-category="women">Women</button>
+                <button class="filter-btn" data-category="unisex">Unisex</button>
+            </div>
+            <div class="products-grid" id="products-container">
+                <!-- Produk akan dimuat secara dinamis -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Shopping Cart</h3>
+            <div id="cart-items"></div>
+            <div class="cart-total">
+                <strong>Total: Rp <span id="cart-total">0</span></strong>
+            </div>
+            <button id="checkout-btn" class="btn">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="js/animations.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

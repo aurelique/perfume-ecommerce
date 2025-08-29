@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Luxe Fragrance</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Login Form -->
+        <div id="login-form" class="login-section">
+            <h2>Admin Login</h2>
+            <form id="admin-login">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+
+        <!-- Dashboard (hidden by default) -->
+        <div id="dashboard" class="dashboard" style="display: none;">
+            <header class="admin-header">
+                <h1>Admin Dashboard</h1>
+                <button id="logout-btn">Logout</button>
+            </header>
+
+            <div class="dashboard-content">
+                <!-- Navigation Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="inventory">Inventory</button>
+                    <button class="tab-btn" data-tab="orders">Orders</button>
+                    <button class="tab-btn" data-tab="analytics">Analytics</button>
+                </div>
+
+                <!-- Inventory Tab -->
+                <div id="inventory-tab" class="tab-content active">
+                    <div class="inventory-header">
+                        <h2>Product Management</h2>
+                        <button id="add-product-btn" class="btn">Add New Product</button>
+                    </div>
+                    
+                    <div class="inventory-grid" id="inventory-container">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Orders Tab -->
+                <div id="orders-tab" class="tab-content">
+                    <h2>Order Management</h2>
+                    <div class="order-filters">
+                        <select id="status-filter">
+                            <option value="all">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Proof Uploaded">Proof Uploaded</option>
+                            <option value="Paid">Paid</option>
+                        </select>
+                        <select id="sort-orders">
+                            <option value="date_desc">Date (Newest)</option>
+                            <option value="date_asc">Date (Oldest)</option>
+                            <option value="amount_desc">Amount (High to Low)</option>
+                            <option value="amount_asc">Amount (Low to High)</option>
+                        </select>
+                    </div>
+                    <div id="orders-container">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="analytics-tab" class="tab-content">
+                    <h2>Sales Analytics</h2>
+                    <div class="charts-container">
+                        <div class="chart-wrapper">
+                            <canvas id="sales-chart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="category-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <h3>Total Sales</h3>
+                            <p id="total-sales">Rp 0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Orders</h3>
+                            <p id="total-orders">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pending Orders</h3>
+                            <p id="pending-orders">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-title">Add New Product</h3>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="product-description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price (IDR):</label>
+                    <input type="number" id="product-price" required>
+                </div>
+                <div class="form-group">
+                    <label>Category:</label>
+                    <select id="product-category" required>
+                        <option value="men">Men</option>
+                        <option value="women">Women</option>
+                        <option value="unisex">Unisex</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stock:</label>
+                    <input type="number" id="product-stock" required>
+                </div>
+                <div class="form-group">
+                    <label>Image URL:</label>
+                    <input type="url" id="product-image" required>
+                </div>
+                <button type="submit" class="btn">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

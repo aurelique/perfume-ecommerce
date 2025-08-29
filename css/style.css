@@ -43,6 +43,46 @@ body {
     padding: 20px;
 }
 
+/* Tombol Admin Login - tambahkan di bagian CSS lainnya */
+.admin-login-btn {
+    background-color: var(--accent); /* Gunakan warna dari variabel yang sudah ada */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px; /* Bentuk tombol bulat */
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-right: auto; /* Dorong ke kiri, sebelum nav */
+    margin-left: 20px; /* Jarak dari logo */
+    white-space: nowrap; /* Cegah teks pindah baris */
+    border: 1px solid var(--accent); /* Tambahkan border untuk definisi yang lebih baik */
+}
+
+.admin-login-btn:hover {
+    background-color: var(--dark); /* Warna hover */
+    border-color: var(--dark);
+    transform: translateY(-2px); /* Efek angkat kecil saat hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Bayangan saat hover */
+}
+
+.admin-login-btn:active {
+     transform: translateY(0); /* Kembali ke posisi normal saat diklik */
+     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Untuk tampilan mobile, pastikan tombol tetap terlihat baik */
+@media (max-width: 768px) {
+    .admin-login-btn {
+        margin: 5px 0; /* Sesuaikan margin di mobile */
+         padding: 6px 12px; /* Sesuaikan padding di mobile */
+         font-size: 0.8rem; /* Sesuaikan ukuran font di mobile */
+    }
+    .header .container {
+         flex-wrap: wrap; /* Izinkan pembungkus di mobile jika perlu */
+    }
+}
+
 .logo {
     font-family: 'Playfair Display', serif;
     font-size: 24px;

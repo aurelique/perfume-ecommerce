@@ -1,6 +1,7 @@
-// Konfigurasi Google Spreadsheet
-const SPREADSHEET_ID = 'GANTI_DENGAN_SPREADSHEET_ID_ANDA';
-const API_KEY = 'GANTI_DENGAN_API_KEY_ANDA';
+// Konfigurasi Google Spreadsheet dan Web App
+const SPREADSHEET_ID = '1lx8r1ugap_4Y2feyGAsa_2v9-t852NeH1pde71W72Vw';
+const API_KEY = 'AIzaSyAMp_WQyxpTc4bWsP19Fy1W-rha9oHbx7o';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyp-KJ-MfvcyKe7MTI4Ode1V9SnZWand5F_mwYLkUHUAnvoWrct9UnZ53aVQzNS13_C/exec'; // e.g., https://script.google.com/macros/s/.../exec
 
 // Admin Dashboard JavaScript
 const ADMIN_USERNAME = 'admin';
@@ -33,7 +34,7 @@ loginForm.addEventListener('submit', function(e) {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    
+
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         sessionStorage.setItem('adminLoggedIn', 'true');
         showDashboard();
@@ -61,7 +62,7 @@ tabButtons.forEach(button => {
         // Update active button
         tabButtons.forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
-        
+
         // Show active tab
         const tabName = this.dataset.tab;
         tabContents.forEach(content => {
@@ -70,9 +71,9 @@ tabButtons.forEach(button => {
                 content.classList.add('active');
             }
         });
-        
+
         currentTab = tabName;
-        
+
         // Load data for active tab if needed
         if (tabName === 'inventory') {
             loadProducts();
@@ -91,14 +92,16 @@ async function loadDashboardData() {
     loadAnalytics();
 }
 
-// Load Products dari Google Spreadsheet
+// --- PRODUCT MANAGEMENT ---
+
+// Load Products dari Google Spreadsheet (READ)
 async function loadProducts() {
     try {
         const response = await fetch(
             `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/products?key=${API_KEY}`
         );
         const data = await response.json();
-        
+
         if (data.values && data.values.length > 1) {
             // Convert to array of objects
             const headers = data.values[0];
@@ -112,11 +115,12 @@ async function loadProducts() {
         } else {
             products = [];
         }
-        
+
         displayProducts();
     } catch (error) {
         console.error('Error loading products:', error);
-        products = []; // fallback to empty array
+        alert('Failed to load products. Check console for details.');
+        products = [];
         displayProducts();
     }
 }
@@ -125,12 +129,12 @@ async function loadProducts() {
 function displayProducts() {
     const container = document.getElementById('inventory-container');
     container.innerHTML = '';
-    
+
     if (products.length === 0) {
         container.innerHTML = '<p>No products found.</p>';
         return;
     }
-    
+
     products.forEach(product => {
         const card = document.createElement('div');
         card.className = 'inventory-card';
@@ -150,7 +154,7 @@ function displayProducts() {
         `;
         container.appendChild(card);
     });
-    
+
     // Add event listeners
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -158,7 +162,7 @@ function displayProducts() {
             editProduct(productId);
         });
     });
-    
+
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const productId = this.dataset.id;
@@ -191,22 +195,45 @@ function editProduct(productId) {
     }
 }
 
-// Delete Product
-function deleteProduct(productId) {
+// Delete Product (via Web App)
+async function deleteProduct(productId) {
     if (confirm('Are you sure you want to delete this product?')) {
-        // In a real implementation, you would remove from Google Sheets
-        console.log('Delete product:', productId);
-        alert('Product deletion would be implemented with Google Sheets API write operations');
+        try {
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                // mode: 'no-cors', // Hapus baris ini jika memungkinkan
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'deleteProduct',
+                    id: productId
+                })
+            });
+
+            // Karena mode no-cors, kita tidak bisa membaca response body dengan mudah.
+            // Kita asumsikan berhasil jika status 200 OK.
+            if (response.ok) {
+                 alert('Product deleted successfully!');
+                 // Reload data
+                 await loadProducts();
+            } else {
+                 throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+             console.error('Error deleting product:', error);
+             alert('Error deleting product. Please check console.');
+        }
     }
 }
 
-// Product Form Submission
-productForm.addEventListener('submit', function(e) {
+// Product Form Submission (via Web App)
+productForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const productId = document.getElementById('product-id').value;
     const productData = {
-        id: productId || 'ID_' + Date.now(),
+        id: productId || null,
         name: document.getElementById('product-name').value,
         description: document.getElementById('product-description').value,
         price: document.getElementById('product-price').value,
@@ -214,25 +241,34 @@ productForm.addEventListener('submit', function(e) {
         stock: document.getElementById('product-stock').value,
         image_url: document.getElementById('product-image').value
     };
-    
-    if (productId) {
-        // Update existing product
-        const index = products.findIndex(p => p.id === productId);
-        if (index !== -1) {
-            products[index] = productData;
+
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            // mode: 'no-cors', // Hapus baris ini jika memungkinkan
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: productId ? 'updateProduct' : 'addProduct',
+                ...productData
+            })
+        });
+
+        // Karena mode no-cors, kita tidak bisa membaca response body dengan mudah.
+        // Kita asumsikan berhasil jika status 200 OK.
+        if (response.ok) {
+            alert(productId ? 'Product updated successfully!' : 'Product added successfully!');
+            productModal.style.display = 'none';
+            // Reload data
+            await loadProducts();
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        console.log('Updated product:', productData);
-    } else {
-        // Add new product
-        products.push(productData);
-        console.log('Added new product:', productData);
+    } catch (error) {
+        console.error('Error saving product:', error);
+        alert('Error saving product. Please check console.');
     }
-    
-    displayProducts();
-    productModal.style.display = 'none';
-    
-    // In a real implementation, you would save to Google Sheets
-    alert('Product saved! (In a real implementation, this would save to Google Sheets)');
 });
 
 // Close Modal
@@ -248,14 +284,16 @@ window.addEventListener('click', function(e) {
     }
 });
 
-// Load Orders dari Google Spreadsheet
+// --- ORDER MANAGEMENT ---
+
+// Load Orders dari Google Spreadsheet (READ)
 async function loadOrders() {
     try {
         const response = await fetch(
             `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/orders?key=${API_KEY}`
         );
         const data = await response.json();
-        
+
         if (data.values && data.values.length > 1) {
             // Convert to array of objects
             const headers = data.values[0];
@@ -269,11 +307,12 @@ async function loadOrders() {
         } else {
             orders = [];
         }
-        
+
         displayOrders();
     } catch (error) {
         console.error('Error loading orders:', error);
-        orders = []; // fallback to empty array
+        alert('Failed to load orders. Check console for details.');
+        orders = [];
         displayOrders();
     }
 }
@@ -282,20 +321,20 @@ async function loadOrders() {
 function displayOrders() {
     const container = document.getElementById('orders-container');
     container.innerHTML = '';
-    
+
     if (orders.length === 0) {
         container.innerHTML = '<p>No orders found.</p>';
         return;
     }
-    
+
     // Apply filters
     let filteredOrders = [...orders];
-    
+
     const statusFilter = document.getElementById('status-filter').value;
     if (statusFilter !== 'all') {
         filteredOrders = filteredOrders.filter(order => order.status === statusFilter);
     }
-    
+
     // Apply sorting
     const sortValue = document.getElementById('sort-orders').value;
     filteredOrders.sort((a, b) => {
@@ -312,7 +351,7 @@ function displayOrders() {
                 return 0;
         }
     });
-    
+
     filteredOrders.forEach(order => {
         const card = document.createElement('div');
         card.className = 'order-card';
@@ -331,9 +370,9 @@ function displayOrders() {
                 <p><strong>Date:</strong> ${order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID') : 'N/A'}</p>
             </div>
             <div class="order-items">
-                <!-- In a real implementation, you would fetch order items from order_items sheet -->
+                <!-- Note: In a full implementation, you'd fetch order items from the 'order_items' sheet -->
                 <div class="order-item">
-                    <span>Order items would be loaded from order_items sheet</span>
+                    <span>Order items (see order_items sheet)</span>
                     <span>Rp 0</span>
                 </div>
             </div>
@@ -351,7 +390,7 @@ function displayOrders() {
         `;
         container.appendChild(card);
     });
-    
+
     // Add event listeners for status updates
     document.querySelectorAll('.update-status-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -362,21 +401,47 @@ function displayOrders() {
     });
 }
 
-// Update Order Status
-function updateOrderStatus(orderId, newStatus) {
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-        order.status = newStatus;
-        displayOrders();
-        // In a real implementation, you would update Google Sheets
-        console.log(`Order ${orderId} status updated to ${newStatus}`);
-        alert(`Order status updated! (In a real implementation, this would update Google Sheets)`);
+// Update Order Status (via Web App)
+async function updateOrderStatus(orderId, newStatus) {
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            // mode: 'no-cors', // Hapus baris ini jika memungkinkan
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'updateOrderStatus',
+                order_id: orderId,
+                status: newStatus
+            })
+        });
+
+        // Karena mode no-cors, kita tidak bisa membaca response body dengan mudah.
+        // Kita asumsikan berhasil jika status 200 OK.
+        if (response.ok) {
+            // Update UI optimistically
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                displayOrders(); // Refresh display
+                alert(`Order ${orderId} status updated to ${newStatus}`);
+            }
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        alert('Error updating order status. Please check console.');
     }
 }
+
 
 // Filter and Sort Event Listeners
 document.getElementById('status-filter').addEventListener('change', displayOrders);
 document.getElementById('sort-orders').addEventListener('change', displayOrders);
+
+// --- ANALYTICS ---
 
 // Load Analytics
 function loadAnalytics() {
@@ -384,12 +449,12 @@ function loadAnalytics() {
     const totalSales = orders.reduce((sum, order) => sum + parseInt(order.total_amount || 0), 0);
     const totalOrders = orders.length;
     const pendingOrders = orders.filter(order => order.status === 'Pending').length;
-    
+
     // Update stats cards
     document.getElementById('total-sales').textContent = `Rp ${totalSales.toLocaleString('id-ID')}`;
     document.getElementById('total-orders').textContent = totalOrders;
     document.getElementById('pending-orders').textContent = pendingOrders;
-    
+
     // Create charts
     createSalesChart();
     createCategoryChart();
@@ -398,16 +463,16 @@ function loadAnalytics() {
 // Create Sales Chart
 function createSalesChart() {
     const ctx = document.getElementById('sales-chart').getContext('2d');
-    
+
     // Simulated monthly sales data
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const salesData = [15000000, 18000000, 22000000, 19000000, 25000000, 28000000];
-    
+
     // Destroy existing chart if it exists
     if (window.salesChart) {
         window.salesChart.destroy();
     }
-    
+
     window.salesChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -446,16 +511,16 @@ function createSalesChart() {
 // Create Category Chart
 function createCategoryChart() {
     const ctx = document.getElementById('category-chart').getContext('2d');
-    
+
     // Simulated category data
     const categories = ['Men', 'Women', 'Unisex'];
     const sales = [45, 35, 20];
-    
+
     // Destroy existing chart if it exists
     if (window.categoryChart) {
         window.categoryChart.destroy();
     }
-    
+
     window.categoryChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
